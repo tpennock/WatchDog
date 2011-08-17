@@ -1,0 +1,243 @@
+<html>
+	<head>
+        <title>Watch Dog : Bite Your ISP</title>
+		<link rel="stylesheet" href="css/eggplant/jquery-ui-1.8.15.custom.css" />
+        		
+		<style type="text/css">
+			
+			* {
+				font-family: Helvetica;
+				font-size: 12px;
+			}
+			
+			body {
+				background: #999 url(img/bg.png) no-repeat top left;
+				padding: 7px; 
+			}
+			
+			#step1 {
+				
+				margin-top: 89px;
+ 				text-align:center;
+				color: #999;
+				
+			}
+			
+			#status { text-align:center; margin-top:30px; }
+			
+			
+			#timer {
+				  
+				display:block;
+				color:white;
+				font-size:25px;
+				font-family:Courier monospace;
+				
+			}
+			
+			#state {
+				margin-top:80px;
+				color: white;
+				font-size: 20px;
+				font-family: Helvetica;
+			}
+			
+			#status .msg {
+				
+				font-family: Helvetica;
+				font-size:25px;
+				color:#70a7ff;
+				font-weight:600;
+				letter-spacing:0px;
+			}
+			
+			#footer { text-align:center; }
+			
+			#footer img { 
+				position:absolute;
+				bottom: 1px;
+				right: 1px;
+				display:none;
+			}
+  			
+		</style>
+		
+		
+		<script type="text/javascript" src="lib/air/AIRAliases.js"></script>
+        <script type="text/javascript" src="lib/air/AIRMenuBuilder.js"></script> 
+		<script type="text/javascript" src="lib/jquery/jquery-1.4.2.min.js"></script>
+		<script type="text/javascript" src="lib/jquery/jquery-ui-1.8.15.custom.min.js"></script>
+		<script type="text/javascript" src="lib/jquery/jquery.json-2.2.min.js"></script>
+		
+        <script type="application/x-shockwave-flash" src="lib/air/applicationupdater_ui.swf"></script>
+        <script type="text/javascript">
+ 			
+			var modem = null;
+			
+			var config = {
+				
+				"version" : "1.0",
+				"lookup_delay" : 10000
+				
+			};
+			
+			var modems = [
+				{
+					"model" 	: "PK5000",
+					"ip" 		: "192.168.0.1",
+					"page" 		: "/cgi-bin/webcm?getpage=../html/modemstatus_real.html",
+					"online_rx" : "/online/",
+					"speed_rx"  : "/speed:(0-9)*?mbps"				
+				},
+				{
+					"model" : "ACME",
+					"ip" 	: "192.168.0.100",
+					"page"	: "status.html",
+					"online_rx" : "/online/",
+					"speed_rx"  : "/speed:(0-9)*?mbps"		
+				}
+			];
+             
+			$(function(){
+				
+				wireup_eventHandlers();
+				bind_modem_types();
+				startup_animation();
+				
+				$('button').button({
+					icons: {
+						primary: "ui-icon-play"
+					}
+				});
+				
+			});
+			
+			function startup_animation() {
+				$('#status').fadeIn('fast');
+				$('#footer img').fadeIn(3000);
+			}
+			
+			function bind_modem_types() {
+				
+				var opts = [];				
+				//
+				// Add the default option
+				//
+				opts.push( '<option>Select Your Modem Type</option>' );
+				//
+				// Add all modem types
+				//
+				for (var i = 0; i < modems.length; ++i) {
+					opts.push( '<option>' + modems[i].model + '</option>' );
+				}
+				//
+				// Append to select tag
+				//
+				$('#model').html( opts.join('\r\n') );
+			}
+			
+			function begin_monitoring() {
+				var m = $('#model').val();
+				
+				//
+				// Modem Selected
+				//
+				if( m == "Select Your Modem Type" ) {
+					alert( 'Choose your modem type so we know what we\'re looking for.' );
+					return;
+				}
+				
+				//
+				// Set modem configuration
+				//
+				var model = $('#model').val();
+				for( var i=0; i<modems.length; ++i ) {
+					if( modems[i].model == model ) {
+						
+						modem = modems[i];
+						test_page();
+						return;
+					}
+				} 
+				
+				alert( 'Could not find configuration information for this modem type.  Stopping.')
+			}
+			
+			//
+			// Check Timer
+			//
+			var ct_id;
+			//
+			// Uptime Timer
+			//
+			var ut_id;
+			//
+			// Downtime Timer
+			//
+			var dt_id;
+			
+			
+			function test_page() {
+				
+				if( ct_id != null ) window.clearTimeout( ct_id );
+				
+				var url = 'http://' + modem.ip + modem.page;
+						 
+				$.get( url, null, function(data){
+					parse_modem_page(data);
+					ct_id = window.setTimeout(test_page, config.lookup_delay);
+				});
+			}
+			
+			function parse_modem_page(data) {
+				alert( data );
+			} 
+			 
+			function wireup_eventHandlers() {
+				
+				$('button').click(begin_monitoring);
+				
+			}
+			
+        </script>
+	</head>
+
+    <body>
+    	
+		<div id="header"></div>
+		
+		<div id="step1"> 
+			<select id="model"></select>
+			<button>Start Monitoring</button>
+		</div>
+		
+		<div id="status" style="display:none;">
+			<p class="msg">I'm ready, you ready?</p> 
+			<p id="timer">00:00:00</p>		
+		</div>
+		
+		<div id="state">
+			
+			<p>
+				<span style="float: left; margin-right: .3em;" class="ui-icon ui-icon-signal-diag"></span>
+				Connection Status: <span id="connection_state">Unknown</span>
+			</p>
+			<p>
+				<span style="float: left; margin-right: .3em;" class="ui-icon ui-icon-transferthick-e-w"></span>
+				Connection Speed: <span id="connection_speed">Unknown</span>
+			</p>
+			
+			<p id="connection_state">
+				<span style="float: left; margin-right: .3em;" class="ui-icon ui-icon-lightbulb"></span>
+				Internet Status: <span id="connection_speed">Unknown</span>
+			</p>
+			
+		</div>
+		 
+		<div id="footer">
+			<img src="img/idle.png" id="status_icon" />
+		</div>	 
+		 
+		 
+    </body>
+</html>

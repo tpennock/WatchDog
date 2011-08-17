@@ -1,0 +1,79 @@
+* {
+	font-family: Helvetica;
+	font-size: 12px;
+}
+
+#state p {
+	color:#ccc;
+}
+
+#state span {
+	color:white;
+	font-weight:bold;
+}
+
+body {
+	background: #999 url(../img/bg.png) no-repeat top left;
+	padding: 7px; 
+}
+
+#step1 {
+	
+	margin-top: 89px;
+	text-align:center;
+	color: #999;
+	
+}
+
+
+select {
+	
+	height:26px;
+	color:#666;
+	font-weight:bold;
+}
+
+#status { text-align:center; margin-top:30px; }
+
+
+#timer {
+	  
+	display:block;
+	color:white;
+	font-size:40px;
+	font-family:Courier monospace;
+	
+}
+
+#state {
+	margin-top:60px;
+	color: white;
+	font-size: 20px;
+	font-family: Helvetica;
+}
+
+#status .msg {
+	
+	font-family: Helvetica;
+	font-size:25px;
+	color:#70a7ff;
+	font-weight:600;
+	letter-spacing:0px;
+}
+
+#status .error {
+	color: red;
+}
+
+#status .connected {
+	color: #70a7ff;
+}
+
+#footer { text-align:center; }
+
+#footer img { 
+	position:absolute;
+	bottom: 1px;
+	right: 1px;
+	display:none;
+}
